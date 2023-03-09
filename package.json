@@ -1,0 +1,33 @@
+{
+  "name": "infer-mongoose-schema",
+  "version": "1.0.0",
+  "description": "Enables automatic generation of Mongoose schemas from strongly typed objects",
+  "main": "dist/index.js",
+  "scripts": {
+    "test": "jest",
+    "build": "tsc"
+  },
+  "keywords": [
+    "typescript",
+    "class",
+    "mongoose",
+    "schema",
+    "infer",
+    "generate",
+    "parse"
+  ],
+  "author": {
+    "name": "Jay Clark",
+    "email": "jay@jayeclark.dev"
+  },
+  "license": "MIT",
+  "devDependencies": {
+    "typescript": "^4.9.5"
+  },
+  "peerDependencies": {
+    "mongoose": "^7.0.1"
+  },
+  "dependencies": {
+    "jest": "^29.5.0"
+  }
+}
