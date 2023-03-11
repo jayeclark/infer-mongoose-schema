@@ -1,9 +1,10 @@
 {
   "name": "infer-mongoose-schema",
-  "version": "1.0.0",
+  "version": "0.0.1-alpha",
   "description": "Enables automatic generation of Mongoose schemas from strongly typed objects",
   "main": "dist/index.js",
   "scripts": {
+    "prepublish": "npm run build",
     "test": "ts-mocha -p tsconfig.json tests/**/*.spec.ts",
     "build": "tsc"
   },
