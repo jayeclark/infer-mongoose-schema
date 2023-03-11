@@ -9,7 +9,7 @@ describe('SINGLE OBJECT INFERENCE', () => {
     it('should generate a valid schema that can be used to create a model', () => {
     const testObject = new TestClass('name1', 100, );
 
-    const generatedSchemaTree = inferSchema(testObject).tree;
+    const generatedSchemaTree = (inferSchema(testObject) as any).tree;
     
     let error = false;
     let userModel;
@@ -24,7 +24,7 @@ describe('SINGLE OBJECT INFERENCE', () => {
   
   it('should infer correct schema from simple sample object', () => {
     const testObject = new TestClass('name1', 100, );
-    const expectedSchemaTree = new Schema({
+    const expectedSchemaTree = (new Schema({
       stringProperty: { type: String, required: true },
       numberProperty: { type: Number, required: true },
       bufferProperty: { type: Buffer, required: true },
@@ -35,9 +35,9 @@ describe('SINGLE OBJECT INFERENCE', () => {
       arrayPropertyWithObjects: { type: Array, required: true },
       decimal128Property: { type: Schema.Types.Decimal128, required: true },
       mapProperty: { type: Map, required: true },
-    }).tree
+    }) as any).tree
 
-    const generatedSchemaTree = inferSchema(testObject).tree;
+    const generatedSchemaTree = (inferSchema(testObject) as any).tree;
     
     const expectedKeys = Object.keys(expectedSchemaTree);
     expectedKeys.forEach((key) => {
@@ -67,7 +67,7 @@ describe('SINGLE OBJECT INFERENCE', () => {
       mapProperty: testMap
     }
 
-    const expectedSchemaTree = new Schema({
+    const expectedSchemaTree = (new Schema({
       stringProperty: { type: String, required: true, default: "defaultStringValue" },
       numberProperty: { type: Number, required: true, default: 123 },
       bufferProperty: { type: Buffer, required: true, default: Buffer.from('ree')},
@@ -78,9 +78,9 @@ describe('SINGLE OBJECT INFERENCE', () => {
       arrayPropertyWithObjects: { type: Array, required: true, default: [{ name: "something" }] },
       decimal128Property: { type: Schema.Types.Decimal128, required: true, default: testDecimal128 },
       mapProperty: { type: Map, required: true, default: testMap },
-    }).tree
+    }) as any).tree
 
-    const generatedSchemaTree = inferSchema(testObject, { defaultValues }).tree;
+    const generatedSchemaTree = (inferSchema(testObject, { defaultValues }) as any).tree;
     
     const expectedKeys = Object.keys(expectedSchemaTree);
     expectedKeys.forEach((key) => {
@@ -97,7 +97,7 @@ describe('SINGLE OBJECT INFERENCE', () => {
     
     const stronglyTypeArrays = true;
 
-    const expectedSchemaTree = new Schema({
+    const expectedSchemaTree = (new Schema({
       stringProperty: { type: String, required: true },
       numberProperty: { type: Number, required: true },
       bufferProperty: { type: Buffer, required: true },
@@ -108,9 +108,9 @@ describe('SINGLE OBJECT INFERENCE', () => {
       arrayPropertyWithObjects: { type: [ { name: { type: String, required: true }}], required: true },
       decimal128Property: { type: Schema.Types.Decimal128, required: true },
       mapProperty: { type: Map, required: true },
-    }).tree
+    }) as any).tree
 
-    const generatedSchemaTree = inferSchema(testObject, { stronglyTypeArrays }).tree;
+    const generatedSchemaTree = (inferSchema(testObject, { stronglyTypeArrays }) as any).tree;
 
     const expectedKeys = Object.keys(expectedSchemaTree);
     expectedKeys.forEach((key) => {
