@@ -5,7 +5,7 @@ export interface TestClassInterface {
   numberProperty: number;
   bufferProperty: Buffer;
   booleanProperty: boolean;
-  mixedProperty: string | number | boolean;
+  mixedProperty: string | number | boolean | undefined;
   objectId: ObjectId;
   arrayPropertyWithPrimitives: Array<string>;
   arrayPropertyWithObjects: Array<Record<string, string>>;
@@ -16,12 +16,12 @@ export interface TestClassInterface {
 
 export class TestClass implements TestClassInterface {
   stringProperty: string;
-  numberProperty: number | undefined;
+  numberProperty: number;
   bufferProperty: Buffer;
   booleanProperty: boolean;
-  mixedProperty: string | number | boolean;
+  mixedProperty: string | number | boolean | undefined;
   objectId: ObjectId;
-  arrayPropertyWithPrimitives: Array<string> | undefined;
+  arrayPropertyWithPrimitives: Array<string>;
   arrayPropertyWithObjects: Array<Record<string, string>>;
   arrayPropertyWithMixed: Array<string | number>;
   decimal128Property: Decimal128;
