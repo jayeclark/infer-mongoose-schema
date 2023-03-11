@@ -8,7 +8,7 @@ or
 yarn add infer-mongoose-schema
 ```
 
-#Purpose of Package
+# Purpose
 To enable generation of Mongoose Schema based on an object, array of objects, class, or function.
 
 This is an early alpha version released for a specific use case in another repository. Highly recommend waiting until v 1.0.0 to install.
