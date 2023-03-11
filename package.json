@@ -32,5 +32,8 @@
   },
   "peerDependencies": {
     "mongoose": "^7.0.1"
+  },
+  "dependencies": {
+    "bson": "^5.0.1"
   }
 }
