@@ -5,7 +5,7 @@ import { inferConfigFromObject, InferFromSingleObjectOptions } from './config/in
 
 type InferModelOptions<T> = InferFromSingleObjectOptions<T>
 
-export default function inferSchema<T>(arg: T | T[] | Class<T> | PojoFunction<T>, options?: InferModelOptions<T>): Schema {
+function inferSchema<T>(arg: T | T[] | Class<T> | PojoFunction<T>, options?: InferModelOptions<T>): Schema {
   if (isClassConstructor<T>(arg as Class<T>)) {
     //return inferSchemaFromClassConstructor(arg)
      throwMethodNotImplementedError(InferenceOptions.CLASS);
@@ -36,3 +36,5 @@ function inferSchemaFromObject<T>(object: T, options?: InferFromSingleObjectOpti
   const config: MongooseDocument<T> = inferConfigFromObject(object, options);
   return new Schema(config as ObtainDocumentType<Record<string, MongooseModelObject<any>>>);
 }
+
+export { inferSchema }

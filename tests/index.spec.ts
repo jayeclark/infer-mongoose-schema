@@ -1,6 +1,6 @@
 import { describe, it } from "mocha";
 import { expect } from "chai";
-import inferSchema from '../src/index';
+import { inferSchema } from '../src/index';
 import { TestClass, TestClassInterface } from './TestClass';
 import mongoose, { Model, Schema } from 'mongoose';
 import { Decimal128, ObjectId } from "bson";
