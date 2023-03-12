@@ -21,14 +21,14 @@ function inferSchema<T>(arg: T | T[] | Class<T> | ObjectLiteralFunction<T>, opti
   }
 
   /**
-   * Inference based on functional components or modules is targeted for implementation in v 2.0.0.
+   * Inference based on functional components or modules is targeted for implementation in v 1.2.0.
    */
   if (isFunctionalComponent(arg as ObjectLiteralFunction<T>)) {
     throwMethodNotImplementedError(InferenceOptions.FUNCTION);
   }
 
   /**
-   * Inference based on an array of sample objects is targeted for implementation in v 2.0.0.
+   * Inference based on an array of sample objects is targeted for implementation in v 1.1.0.
    */
   if (isArrayOfSampleObjects(arg as T[])) {
     throwMethodNotImplementedError(InferenceOptions.ARRAY)
