@@ -5,19 +5,39 @@ import { Decimal128, ObjectId } from 'bson';
 type Key<T> = (string | number | symbol) & keyof T
 
 export interface InferFromSingleObjectOptions<T> {
-  optionalAttributes?: string[];
-  defaultValues?: T;
+  /**
+   * Specifies attributes that should be considered optional. Since we have only a single object, we don't have enough
+   * information to infer which object properties are required or not. Therefore, they must be explicitly passed to the 
+   * inference function as optional attributes. Including an optional attribute that is not actually a key of the sample
+   * object will not throw an error, but it also will not have any effect (that is, one cannot ADD properties by 
+   * submitting a new property as an optional attribute.)
+   */
+  optionalAttributes?: (keyof T)[];
+  /**
+   * It is possible to define default values for certain properties by providing an object literal that contains
+   * the desired default values. Only include keys for which default values should be set in the schema. 
+   */
+  defaultValues?: Record<string, unknown>;
+  /**
+   * Determines the behavior that should be used with regard to inference from arrays. Set to true if the desired schema
+   * config is to define the type of content in the array (i.e. "type: [String]"). Default value is false. 
+   */
   stronglyTypeArrays?: boolean;
 }
 
 export function inferConfigFromObject<T>(object: T, options?: InferFromSingleObjectOptions<T>): MongooseDocument<T> {
-  const allNamesAndSymbols: Key<T>[] = (Object.getOwnPropertyNames(object) as Key<T>[])
-    .concat(Object.getOwnPropertySymbols(object) as Key<T>[])
-    .map((attribute: Key<T>) => String(attribute) as Key<T>)
-  const attributes: Key<T>[] = allNamesAndSymbols.filter((key: Key<T>) => typeof object[key] !== 'function')
+  const attributes: Key<T>[] = getAllValidNamesAndSymbols(object)
   const configObject: Record<string | number | symbol, any> = generateConfigObjectFromAttributes(attributes, object, options);
 
   return configObject;
+}
+
+function getAllValidNamesAndSymbols<T>(object: T): Key<T>[] {
+  const allNamesAndSymbols: Key<T>[] = (Object.getOwnPropertyNames(object) as Key<T>[])
+    .concat(Object.getOwnPropertySymbols(object) as Key<T>[])
+    .map((attribute: Key<T>) => String(attribute) as Key<T>)
+  const validNamesAndSymbols: Key<T>[] = allNamesAndSymbols.filter((key: Key<T>) => typeof object[key] !== 'function')
+  return validNamesAndSymbols
 }
 
 function generateConfigObjectFromAttributes<T>(attributes: Array<(string | number | symbol) & keyof T>, object: T, options?: InferFromSingleObjectOptions<T>) {
@@ -29,15 +49,16 @@ function generateConfigObjectFromAttributesAndNamespace<T>(attributes: Array<(st
   const defaultValues = options?.defaultValues || null;
       
   const configObject: Record<keyof T, any> = {} as T;
+  
   attributes.forEach((attribute: keyof T) => {
     const subNamespace = `${String(namespace)}${namespace ? ":" : ""}${ String(attribute) }`
 
     const temp: MongooseModelConstructor<MongooseModelBaseConstructor> = {
         "type": getSchemaDefinitionPropertyType(object[attribute], subNamespace, options),
-        required: !optionalAttributes || !(optionalAttributes.has(String(attribute)))
+        required: !optionalAttributes || !(optionalAttributes.has(String(attribute) as keyof T))
     }
     if (defaultValues) {
-      temp.default = defaultValues[attribute]
+      temp.default = defaultValues[attribute as string]
     }
     configObject[attribute] = temp;
   }) 
@@ -47,19 +68,52 @@ function generateConfigObjectFromAttributesAndNamespace<T>(attributes: Array<(st
 function getSchemaDefinitionPropertyType<T>(value: any, namespace: string, options?: InferFromSingleObjectOptions<T>) {
   const stronglyTypeArrays = options?.stronglyTypeArrays;
 
-  if (isUndefined(value)) { return SCHEMA_PROPERTY_TYPES[SchemaPropertyType.Mixed] }
-  if (isString(value)) { return SCHEMA_PROPERTY_TYPES[SchemaPropertyType.String] }
-  if (isNumber(value)) { return SCHEMA_PROPERTY_TYPES[SchemaPropertyType.Number] }
-  if (isDate(value)) { return SCHEMA_PROPERTY_TYPES[SchemaPropertyType.Date] }
-  if (isBuffer(value)) { return SCHEMA_PROPERTY_TYPES[SchemaPropertyType.Buffer] }
-  if (isBoolean(value)) { return SCHEMA_PROPERTY_TYPES[SchemaPropertyType.Boolean] }
-  if (isObjectId(value)) { return SCHEMA_PROPERTY_TYPES[SchemaPropertyType.ObjectId] }
-  if (isEmptyArray(value) || (isPopulatedArray(value) && !stronglyTypeArrays)) { return SCHEMA_PROPERTY_TYPES[SchemaPropertyType.Array] }
-  if (isPopulatedArray(value) && stronglyTypeArrays) { return [getArrayPropertyType(value, namespace, options)] }
-  if (isDecimal128(value)) { return SCHEMA_PROPERTY_TYPES[SchemaPropertyType.Decimal128] }
-  if (isMap(value)) { return SCHEMA_PROPERTY_TYPES[SchemaPropertyType.Map] }
+  if (isUndefined(value)) {
+    return SCHEMA_PROPERTY_TYPES[SchemaPropertyType.Mixed]
+  }
+
+  if (isString(value)) {
+    return SCHEMA_PROPERTY_TYPES[SchemaPropertyType.String]
+  }
+
+  if (isNumber(value)) {
+    return SCHEMA_PROPERTY_TYPES[SchemaPropertyType.Number]
+  }
+
+  if (isDate(value)) {
+    return SCHEMA_PROPERTY_TYPES[SchemaPropertyType.Date]
+  }
+
+  if (isBuffer(value)) {
+    return SCHEMA_PROPERTY_TYPES[SchemaPropertyType.Buffer]
+  }
+
+  if (isBoolean(value)) {
+    return SCHEMA_PROPERTY_TYPES[SchemaPropertyType.Boolean]
+  }
+
+  if (isObjectId(value)) {
+    return SCHEMA_PROPERTY_TYPES[SchemaPropertyType.ObjectId]
+  }
+
+  if (isEmptyArray(value)) {
+    return SCHEMA_PROPERTY_TYPES[SchemaPropertyType.Array]
+  }
+
+  if (isPopulatedArray(value)) {
+    return stronglyTypeArrays ? [getArrayPropertyType(value, namespace, options)] : SCHEMA_PROPERTY_TYPES[SchemaPropertyType.Array]
+  }
+
+  if (isDecimal128(value)) {
+    return SCHEMA_PROPERTY_TYPES[SchemaPropertyType.Decimal128]
+  }
+
+  if (isMap(value)) {
+    return SCHEMA_PROPERTY_TYPES[SchemaPropertyType.Map]
+  }
+
   if (isObject(value)) {
-    return generateConfigObjectFromAttributesAndNamespace(Object.keys(value), value, namespace, options)
+    return generateConfigObjectFromAttributesAndNamespace(Object.keys(value) as ((string | number | symbol) & keyof T)[], value, namespace, options)
   }
 }
 

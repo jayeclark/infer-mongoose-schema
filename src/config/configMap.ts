@@ -1,6 +1,9 @@
 import { MongooseModelBaseConstructor } from '../types';
 import { Schema } from 'mongoose';
 
+/**
+ * Schema property types supported by Mongoose 7.0.0
+ */
 export enum SchemaPropertyType {
   String = "String",
   Number = "Number",
@@ -14,6 +17,9 @@ export enum SchemaPropertyType {
   Map = "Map"
 }
 
+/**
+ * Model used to connect schema property types to the function that should be returned in order to generate the schema config.
+ */
 export const SCHEMA_PROPERTY_TYPES: Record<SchemaPropertyType, MongooseModelBaseConstructor> = {
   [SchemaPropertyType.String]: String,
   [SchemaPropertyType.Number]: Number,
