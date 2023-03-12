@@ -1,7 +1,7 @@
 {
   "name": "infer-mongoose-schema",
   "version": "0.0.4-alpha",
-  "description": "Enables automatic generation of Mongoose schemas from strongly typed objects",
+  "description": "Enables automatic generation of Mongoose schemas from sample objects",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "scripts": {
@@ -11,12 +11,15 @@
   },
   "keywords": [
     "typescript",
-    "class",
+    "object modeling",
+    "mongodb",
     "mongoose",
     "schema",
+    "config",
     "infer",
     "generate",
-    "parse"
+    "parse",
+    "sample object"
   ],
   "author": {
     "name": "Jay Clark",
