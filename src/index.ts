@@ -2,6 +2,7 @@ import { ObtainDocumentType, Schema } from 'mongoose'
 import { isClassConstructor, isFunctionalComponent, isArrayOfSampleObjects, isSingleSampleObject } from './argParsers';
 import { Class, ObjectLiteralFunction, InferenceOptions, MongooseDocument, MongooseModelObject } from './types';
 import { inferConfigFromObject, InferFromSingleObjectOptions } from './config/inferConfigFromObject';
+import { throwMethodNotImplementedError, throwInvalidInputError } from './error';
 
 type InferModelOptions<T> = InferFromSingleObjectOptions<T>
 
@@ -13,6 +14,10 @@ const IMPLEMENTED_ARGUMENT_OPTIONS = ["Sample Object"]
  * options, reducing duplicated code.
  */
 function inferSchema<T>(arg: T | T[] | Class<T> | ObjectLiteralFunction<T>, options?: InferModelOptions<T>): Schema {
+  if (arg == null || arg == undefined) {
+    throw new Error(`Unable to infer schema - input is ${arg}.`)
+  }
+
   /**
    * Inference based on class constructors is targeted for implementation in v 1.0.0.
    */
@@ -45,10 +50,6 @@ function inferSchema<T>(arg: T | T[] | Class<T> | ObjectLiteralFunction<T>, opti
    * Implementations based on anything other than an object, array of objects, class, or function is not planned.
    */
   throw new Error(`Unable to infer schema from provided input. Please provide a valid argument: ${IMPLEMENTED_ARGUMENT_OPTIONS.join(", ")}.`);
-}
-
-function throwMethodNotImplementedError(method: InferenceOptions) {
-  throw new Error(`Unable to infer schema from provided input - inference from ${method} is not yet implemented.`);
 }
 
 /**

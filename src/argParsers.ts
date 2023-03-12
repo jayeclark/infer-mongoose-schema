@@ -1,4 +1,5 @@
-import { Class, ObjectLiteralFunction } from './types';
+import { Class, ObjectLiteralFunction, InferenceOptions } from './types';
+import { throwInvalidInputError } from './error';
 
 export function isClassConstructor<T>(arg: Class<T>) {
 
@@ -34,5 +35,10 @@ export function isArrayOfSampleObjects<T>(arg: T[]) {
 }
 
 export function isSingleSampleObject<T>(arg: T) {
+  const isObject = typeof arg === 'object' && !isClassConstructor<T>(arg as unknown as Class<T>);
+  const isValidObject = isObject && Object.keys(arg).filter((key: string) => typeof arg[key as keyof T] !== 'function').length > 0
+  if (isObject && !isValidObject) {
+    throwInvalidInputError(InferenceOptions.OBJECT)
+  }
   return typeof arg === 'object' && !isClassConstructor<T>(arg as unknown as Class<T>)
 }

@@ -5,8 +5,100 @@ import { TestClass, TestClassInterface } from './TestClass';
 import mongoose, { Model, Schema } from 'mongoose';
 import { Decimal128, ObjectId } from "bson";
 
+describe('CLASS CONSTRUCTOR INFERENCE', () => {
+    it('should throw an error given a class constructor as input', () => {    
+    let error: unknown;
+    let generatedSchemaTree;
+    try {
+      generatedSchemaTree = (inferSchema(TestClass) as any).tree;
+    } catch (e) {
+      error = e;
+    }
+    expect((error as Error).message).to.equal("Unable to infer schema from provided input - inference from Class is not yet implemented.");
+    expect(generatedSchemaTree).to.equal(undefined)
+  })
+
+})
+
+describe('FUNCTION INFERENCE', () => {
+  it('should throw an error given a hoisted function as input', () => {
+      function testObjectFunction() {
+        return {
+          firstName: "Jay",
+          lastName: "Clark"
+        }
+      };
+    
+    let error: unknown;
+    let generatedSchemaTree;
+    try {
+      generatedSchemaTree = (inferSchema(testObjectFunction) as any).tree;
+    } catch (e) {
+      error = e;
+    }
+    expect((error as Error).message).to.equal("Unable to infer schema from provided input - inference from Function is not yet implemented.");
+    expect(generatedSchemaTree).to.equal(undefined)
+  })
+
+  it('should throw an error given a fat arrow function as input', () => {
+    const testObjectFunction = () => ({
+      firstName: "Jay",
+      lastName: "Clark"
+    });
+    
+    let error: unknown;
+    let generatedSchemaTree;
+    try {
+      generatedSchemaTree = (inferSchema(testObjectFunction) as any).tree;
+    } catch (e) {
+      error = e;
+    }
+    expect((error as Error).message).to.equal("Unable to infer schema from provided input - inference from Function is not yet implemented.");
+    expect(generatedSchemaTree).to.equal(undefined)
+  })
+
+  it('should throw an error given a function variable as input', () => {
+    const testObjectFunction = function () {
+      return {
+        firstName: "Jay",
+        lastName: "Clark"
+      }
+    };
+    
+    let error: unknown;
+    let generatedSchemaTree;
+    try {
+      generatedSchemaTree = (inferSchema(testObjectFunction) as any).tree;
+    } catch (e) {
+      error = e;
+    }
+    expect((error as Error).message).to.equal("Unable to infer schema from provided input - inference from Function is not yet implemented.");
+    expect(generatedSchemaTree).to.equal(undefined)
+  })
+
+})
+
+describe('ARRAY OF SAMPLE OBJECTS INFERENCE', () => {
+    it('should throw an error given a class constructor as input', () => {
+    const testObject1 = new TestClass('name1', 100 );
+    const testObject2 = new TestClass('name1', 200);
+    
+    
+    let error: unknown;
+    let generatedSchemaTree;
+    try {
+      generatedSchemaTree = (inferSchema([testObject1, testObject2]) as any).tree;
+    } catch (e) {
+      error = e;
+    }
+    expect((error as Error).message).to.equal("Unable to infer schema from provided input - inference from Array of Sample Objects is not yet implemented.");
+    expect(generatedSchemaTree).to.equal(undefined)
+  })
+
+})
+
 describe('SINGLE OBJECT INFERENCE', () => {
-    it('should generate a valid schema that can be used to create a model', () => {
+    it('should generate a valid schema given a valid sample object as input', () => {
     const testObject = new TestClass('name1', 100, );
 
     const generatedSchemaTree = (inferSchema(testObject) as any).tree;
@@ -14,13 +106,27 @@ describe('SINGLE OBJECT INFERENCE', () => {
     let error = false;
     let userModel;
     try {
-      userModel = mongoose.model('Sample', generatedSchemaTree);
+      userModel = mongoose.model('Sample1', generatedSchemaTree);
     } catch (e) {
       error = true;
     }
     expect(error).to.equal(false);
 
-    })
+  })
+  
+  it('should throw an error given an invalid sample object as input', () => {
+    const testObject = {};
+
+    
+    let error: Error = {} as Error;
+    let generatedSchemaTree: any;
+    try {
+      generatedSchemaTree = (inferSchema(testObject) as any).tree;
+    } catch (e) {
+      error = e;
+    }
+    expect(error.message).to.equal("Unable to infer schema from provided input - argument is not a valid Sample Object.");
+  })
   
   it('should infer correct schema from simple sample object', () => {
     const testObject = new TestClass('name1', 100, );
@@ -80,7 +186,7 @@ describe('SINGLE OBJECT INFERENCE', () => {
       mapProperty: { type: Map, required: true, default: testMap },
     }) as any).tree
 
-    const generatedSchemaTree = (inferSchema(testObject, { defaultValues }) as any).tree;
+    const generatedSchemaTree = (inferSchema(testObject, { defaultValues: (defaultValues as any) } ) as any).tree;
     
     const expectedKeys = Object.keys(expectedSchemaTree);
     expectedKeys.forEach((key) => {
@@ -122,4 +228,98 @@ describe('SINGLE OBJECT INFERENCE', () => {
 
 
   
+})
+
+describe('INVALID INPUT', () => {
+  it('should throw an error given a string as input', () => {
+
+    let error: unknown;
+    let generatedSchemaTree;
+    try {
+      generatedSchemaTree = (inferSchema("abc") as any).tree;
+    } catch (e) {
+      error = e;
+    }
+    expect((error as Error).message).to.equal("Unable to infer schema from provided input. Please provide a valid argument: Sample Object.");
+    expect(generatedSchemaTree).to.equal(undefined)
+  })
+
+  it('should throw an error given a number as input', () => {
+
+    let error: unknown;
+    let generatedSchemaTree;
+    try {
+      generatedSchemaTree = (inferSchema(123) as any).tree;
+    } catch (e) {
+      error = e;
+    }
+    expect((error as Error).message).to.equal("Unable to infer schema from provided input. Please provide a valid argument: Sample Object.");
+    expect(generatedSchemaTree).to.equal(undefined)
+  })
+
+  it('should throw an error given a boolean as input', () => {
+
+    let error: unknown;
+    let generatedSchemaTree;
+    try {
+      generatedSchemaTree = (inferSchema(true) as any).tree;
+    } catch (e) {
+      error = e;
+    }
+    expect((error as Error).message).to.equal("Unable to infer schema from provided input. Please provide a valid argument: Sample Object.");
+    expect(generatedSchemaTree).to.equal(undefined)
+  })
+
+  it('should throw an error given null as input', () => {
+
+    let error: unknown;
+    let generatedSchemaTree;
+    try {
+      generatedSchemaTree = (inferSchema(null) as any).tree;
+    } catch (e) {
+      error = e;
+    }
+    expect((error as Error).message).to.equal("Unable to infer schema - input is null.");
+    expect(generatedSchemaTree).to.equal(undefined)
+  })
+
+  it('should throw an error given undefined as input', () => {
+
+    let error: unknown;
+    let generatedSchemaTree;
+    try {
+      generatedSchemaTree = (inferSchema(undefined) as any).tree;
+    } catch (e) {
+      error = e;
+    }
+    expect((error as Error).message).to.equal("Unable to infer schema - input is undefined.");
+    expect(generatedSchemaTree).to.equal(undefined)
+  })
+
+  it('should throw an error given bigint as input', () => {
+
+    let error: unknown;
+    let generatedSchemaTree;
+    try {
+      generatedSchemaTree = (inferSchema(BigInt(1)) as any).tree;
+    } catch (e) {
+      error = e;
+    }
+    expect((error as Error).message).to.equal("Unable to infer schema from provided input. Please provide a valid argument: Sample Object.");
+    expect(generatedSchemaTree).to.equal(undefined)
+  })
+
+  it('should throw an error given symbol as input', () => {
+
+    let error: unknown;
+    let generatedSchemaTree;
+    try {
+      generatedSchemaTree = (inferSchema(Symbol("foo")) as any).tree;
+    } catch (e) {
+      error = e;
+    }
+    expect((error as Error).message).to.equal("Unable to infer schema from provided input. Please provide a valid argument: Sample Object.");
+    expect(generatedSchemaTree).to.equal(undefined)
+  })
+
 })
