@@ -1,37 +1,59 @@
 import { ObtainDocumentType, Schema } from 'mongoose'
-import { isClassConstructor } from './argParsers';
-import { Class, PojoFunction, InferenceOptions, MongooseDocument, MongooseModelObject } from './types';
+import { isClassConstructor, isFunctionalComponent, isArrayOfSampleObjects, isSingleSampleObject } from './argParsers';
+import { Class, ObjectLiteralFunction, InferenceOptions, MongooseDocument, MongooseModelObject } from './types';
 import { inferConfigFromObject, InferFromSingleObjectOptions } from './config/inferConfigFromObject';
 
 type InferModelOptions<T> = InferFromSingleObjectOptions<T>
 
-function inferSchema<T>(arg: T | T[] | Class<T> | PojoFunction<T>, options?: InferModelOptions<T>): Schema {
-  if (isClassConstructor<T>(arg as Class<T>)) {
-    //return inferSchemaFromClassConstructor(arg)
+const IMPLEMENTED_ARGUMENT_OPTIONS = ["Sample Object"]
+
+/**
+ * Mongoose schema inference simplifies the object modeling process by
+ * inferring schema configuration based on a sample object and configuration 
+ * options, reducing duplicated code.
+ */
+function inferSchema<T>(arg: T | T[] | Class<T> | ObjectLiteralFunction<T>, options?: InferModelOptions<T>): Schema {
+  /**
+   * Inference based on class constructors is targeted for implementation in v 1.0.0.
+   */
+  if (isClassConstructor(arg as Class<T>)) {
      throwMethodNotImplementedError(InferenceOptions.CLASS);
   }
 
-  if (typeof arg === 'function' && arg instanceof Function) {
-    // return inferSchemaFromFunction<T>(arg as PojoFunction<T>);
+  /**
+   * Inference based on functional components or modules is targeted for implementation in v 2.0.0.
+   */
+  if (isFunctionalComponent(arg as ObjectLiteralFunction<T>)) {
     throwMethodNotImplementedError(InferenceOptions.FUNCTION);
   }
 
-  if (Array.isArray(arg) && arg.length > 0 && typeof arg[0] == 'object' && !isClassConstructor<T>(arg[0] as unknown as Class<T>)) {
-    // return inferSchemaFromObjects<T>(arg as T[])
+  /**
+   * Inference based on an array of sample objects is targeted for implementation in v 2.0.0.
+   */
+  if (isArrayOfSampleObjects(arg as T[])) {
     throwMethodNotImplementedError(InferenceOptions.ARRAY)
   }
 
-  if (typeof arg === 'object') {
+  /**
+   * The current 0.0.x versions are limited to inference based on a sample object and associated configuration options.
+   */
+  if (isSingleSampleObject(arg)) {
     return inferSchemaFromObject<T>(arg as T, options);
   }
 
-  throw new Error("Unable to infer schema from provided input");
+  /**
+   * Implementations based on anything other than an object, array of objects, class, or function is not planned.
+   */
+  throw new Error(`Unable to infer schema from provided input. Please provide a valid argument: ${IMPLEMENTED_ARGUMENT_OPTIONS.join(", ")}.`);
 }
 
 function throwMethodNotImplementedError(method: InferenceOptions) {
-  throw new Error(`Unable to infer schema from provided input - inference from ${method} is not yet implemented`);
+  throw new Error(`Unable to infer schema from provided input - inference from ${method} is not yet implemented.`);
 }
 
+/**
+ * Returns a mongoose schema that can be used to generate a model
+ */
 function inferSchemaFromObject<T>(object: T, options?: InferFromSingleObjectOptions<T>): Schema {
   const config: MongooseDocument<T> = inferConfigFromObject(object, options);
   return new Schema(config as ObtainDocumentType<Record<string, MongooseModelObject<any>>>);

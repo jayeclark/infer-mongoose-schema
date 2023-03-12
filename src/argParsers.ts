@@ -1,4 +1,4 @@
-import { Class } from './types';
+import { Class, ObjectLiteralFunction } from './types';
 
 export function isClassConstructor<T>(arg: Class<T>) {
 
@@ -22,4 +22,17 @@ export function isClassConstructor<T>(arg: Class<T>) {
   }
 
   return isPrototype
+}
+
+export function isFunctionalComponent<T>(arg: ObjectLiteralFunction<T>) {
+  return typeof arg === 'function' && (arg as unknown) instanceof Function
+}
+
+export function isArrayOfSampleObjects<T>(arg: T[]) {
+  const allArrayElementsAreSampleObjects = arg.every((sample: T) => isSingleSampleObject(sample))
+  return Array.isArray(arg) && arg.length > 0 && allArrayElementsAreSampleObjects
+}
+
+export function isSingleSampleObject<T>(arg: T) {
+  return typeof arg === 'object' && !isClassConstructor<T>(arg as unknown as Class<T>)
 }

@@ -6,7 +6,7 @@ export interface Class<T> extends Object {
   prototype: (args: any[]) => T
 }
 
-export interface PojoFunction<T> {
+export interface ObjectLiteralFunction<T> {
   prototype: (args: any[]) => T
 }
 
