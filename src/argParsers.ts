@@ -29,8 +29,8 @@ export function isFunctionalComponent<T>(arg: ObjectLiteralFunction<T>) {
 }
 
 export function isArrayOfSampleObjects<T>(arg: T[]) {
-  const allArrayElementsAreSampleObjects = arg.every((sample: T) => isSingleSampleObject(sample))
-  return Array.isArray(arg) && arg.length > 0 && allArrayElementsAreSampleObjects
+  const allArrayElementsAreSampleObjects =  Array.isArray(arg) && arg.every((sample: T) => isSingleSampleObject(sample))
+  return allArrayElementsAreSampleObjects && arg.length > 0
 }
 
 export function isSingleSampleObject<T>(arg: T) {
