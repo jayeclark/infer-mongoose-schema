@@ -1,6 +1,7 @@
 import { MongooseDocument, MongooseModelConstructor, MongooseModelBaseConstructor } from '../types';
 import { SchemaPropertyType, SCHEMA_PROPERTY_TYPES } from './configMap';
-import { Decimal128, ObjectId } from 'bson';
+import { ObjectId } from 'bson';
+import { Decimal128ConversionRules, isDecimal128, shouldConvertToDecimal128 } from '../schemaTypes/decimal128';
 
 type Key<T> = (string | number | symbol) & keyof T
 
@@ -23,6 +24,7 @@ export interface InferFromSingleObjectOptions<T> {
    * config is to define the type of content in the array (i.e. "type: [String]"). Default value is false. 
    */
   stronglyTypeArrays?: boolean;
+  decimal128ConversionRules?: Decimal128ConversionRules[];
 }
 
 export function inferConfigFromObject<T>(object: T, options?: InferFromSingleObjectOptions<T>): MongooseDocument<T> {
@@ -67,6 +69,10 @@ function generateConfigObjectFromAttributesAndNamespace<T>(attributes: Array<(st
 
 function getSchemaDefinitionPropertyType<T>(value: any, namespace: string, options?: InferFromSingleObjectOptions<T>) {
   const stronglyTypeArrays = options?.stronglyTypeArrays;
+  
+  if (shouldConvertToDecimal128(value, options)) {
+    return SCHEMA_PROPERTY_TYPES[SchemaPropertyType.Decimal128]
+  }
 
   if (isUndefined(value)) {
     return SCHEMA_PROPERTY_TYPES[SchemaPropertyType.Mixed]
@@ -155,10 +161,6 @@ function isEmptyArray(value: unknown) {
 
 function isPopulatedArray(value: unknown) {
   return isArray(value) && (value as Array<any>).length > 0;
-}
-
-function isDecimal128(value: unknown) {
-  return typeof value === 'object' && isSameType(value, Decimal128.fromString('1.23')) && value instanceof Decimal128 
 }
 
 function isMap(value: unknown) {
