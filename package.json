@@ -1,6 +1,6 @@
 {
   "name": "infer-mongoose-schema",
-  "version": "0.0.5-alpha",
+  "version": "0.0.5",
   "description": "Enables automatic generation of Mongoose schemas from sample objects",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
