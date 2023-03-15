@@ -226,7 +226,33 @@ describe('SINGLE OBJECT INFERENCE', () => {
     })
   })
 
+  it('should infer correct schema from sample object with optional attributes', () => {
+    const testObject = new TestClass('name1', 100);
+    
+    const optionalAttributes = ["stringProperty" as keyof TestClass, "arrayPropertyWithPrimitives" as keyof TestClass];
 
+    const expectedSchemaTree = (new Schema({
+      stringProperty: { type: String, required: false },
+      numberProperty: { type: Number, required: true },
+      bufferProperty: { type: Buffer, required: true },
+      booleanProperty: { type: Boolean, required: true },
+      mixedProperty: { type: Schema.Types.Mixed, required: true },
+      objectId: { type: Schema.Types.ObjectId, required: true },
+      arrayPropertyWithPrimitives: { type: Array, required: false },
+      arrayPropertyWithObjects: { type: Array, required: true },
+      decimal128Property: { type: Schema.Types.Decimal128, required: true },
+      mapProperty: { type: Map, required: true },
+    }) as any).tree
+
+    const generatedSchemaTree = (inferSchema(testObject, { optionalAttributes }) as any).tree;
+
+    const expectedKeys = Object.keys(expectedSchemaTree);
+    expectedKeys.forEach((key) => {
+      expect(key in generatedSchemaTree).to.equal(true);
+      expect(generatedSchemaTree[key].type.name).to.equal(expectedSchemaTree[key].type.name);
+      expect(generatedSchemaTree[key].required).to.equal(expectedSchemaTree[key].required);
+    })
+  })
   
 })
 
